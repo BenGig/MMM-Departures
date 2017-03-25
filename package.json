@@ -1,0 +1,27 @@
+{
+  "name": "Magic-Mirror-Module-Departures",
+  "version": "0.1.0",
+  "description": "Magic Mirror module for public transport departure info based on public-transport-enabler data (https://github.com/schildbach/public-transport-enabler).",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BenGig/MMM-Departures"
+  },
+  "keywords": [
+    "magic mirror",
+    "smart mirror",
+    "public transport",
+    "public-transport-enabler",
+    "module"
+  ],
+  "author": "Bengt Giger",
+  "contributors": "https://github.com/BenGig/MMM-Departures/graphs/contributors",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BenGig/MMM-Departures/issues"
+  },
+  "homepage": "https://github.com/BenGig/MMM-Departures#readme",
+  "dependencies": {
+    "request": "latest",
+    "underscore": "latest"
+    }
+}
