@@ -28,7 +28,7 @@ There is also an optional parameter per station:
 
 | Option | Description |
 | --- | --- |
-| hideBelow | Hide departures sooner than <value>, so departures you wouldn't reach anyway aren't displayed. Default value: unset |
+| hideBelow | Hide departures sooner than current time minus this value, so departures you wouldn't reach anyway aren't displayed. Default value: unset (display until departure is in the past|
 
 ### Example Configuration
 ```
