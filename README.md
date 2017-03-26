@@ -39,7 +39,7 @@ modules: [
     config: {
       provider: 'Sbb',
       maxElements: 4,
-      updateInterval: 5 * 60 * 1000, // 5 minutes
+      absoluteTime: false,
       stations: [
         {
           stationName: "Markthalle",
