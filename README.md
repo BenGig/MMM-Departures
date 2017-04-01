@@ -51,7 +51,7 @@ modules: [
           stationId: "8500193",
           hideBelow: 5;
           excludeLines: [
-            "NFB2,
+            "NFB2",
           ],
         },
         {
