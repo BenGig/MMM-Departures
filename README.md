@@ -24,11 +24,16 @@ Module global parameters:
 
 Since the request retrieves several future departures and the module eliminates departures which have passed, you don't have to fetch data updates very often. To reduce load on the server, start with the default of 15 minutes and reduce the interval if needed.
 
-There is also an optional parameter per station:
+There are also optional parameters per station:
 
 | Option | Description |
 | --- | --- |
 | hideBelow | Hide departures sooner than current time minus this value, so departures you wouldn't reach anyway aren't displayed. Default value: unset (display until departure is in the past)|
+| includeLines | Show only listed lines. Default: show all lines |
+| excludeLines | Hide lines listed. Default: show all lines |
+| maxDestinationLength | Number of characters to truncate destination names. Default: none |
+
+Options *includeLines* and *excludeLines* are mutually exclusive, use only one of them.
 
 ### Example Configuration
 ```
@@ -45,10 +50,17 @@ modules: [
           stationName: "Markthalle",
           stationId: "8500193",
           hideBelow: 5;
+          excludeLines: [
+            "NFB2,
+          ],
         },
         {
           stationName: "Heuwaage",
-          stationId: "8577412"
+          stationId: "8500079",
+          includeLines: [
+            "NFT6",
+            "NFT10",
+          ],
         },
       ],
     },
@@ -56,3 +68,6 @@ modules: [
 ],
 ```
 
+## Known Problems
+
+In rare circumstances, the backend server does not respond fast enough during startup and no departures are listed. They should appear after the next data update (happended once during development).

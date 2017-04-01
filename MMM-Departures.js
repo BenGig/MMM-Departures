@@ -11,18 +11,6 @@ Module.register('MMM-Departures', {
 
   defaults: {
     apiUrl: 'http://transportrest-sbiermann.rhcloud.com/departureFHEM',
-    provider: 'Sbb',
-    stations: [
-      {
-        stationName: "Aazopf",
-        stationId: "8577410",
-        hideBelow: 8,
-      },
-      {
-        stationName: "Tafelstatt",
-        stationId: "8577412",
-      },
-    ],
     absoluteTime: true,
     maxElements: 5,
     initialLoadDelay: 1000,
@@ -33,10 +21,6 @@ Module.register('MMM-Departures', {
   start: function() {
     var self = this;
     Log.info('Starting module: ' + this.name);
-    for (var i = 0; i<this.config.stations.length; i++) {
-      this.config.stations[i].departures = [];
-      Log.info(this.name + ': added station ' + this.config.stations[i].stationName);
-    }
     this.updateTimer = null;
     this.lastUpdate = NaN;
 
@@ -87,10 +71,64 @@ Module.register('MMM-Departures', {
     num = (num < 10 ? '0' : '' )+ num;
     return num;
   },
+
+  // Filter departures based on remaining time
+  filterPassedDepartures: function(departures, lastUpdate, threshold) {
+    var minutesSinceUpdate = (Date.now() - lastUpdate)/60000;
+    var filteredDepartures = [];
+    
+    for (var i = 0; i < departures.length; i++) {
+      if (parseInt(departures[i][2], 10) - minutesSinceUpdate > 0) {
+        if (parseInt(departures[i][2], 10) - minutesSinceUpdate >= threshold) {
+          filteredDepartures.push(station.departures[i]);
+        }
+      }
+    }     
+    return filteredDepartures;
+  },
+
+  filterIncludedLines: function(departures, wantedLines ) {
+    var filteredDepartures = [];
+    for (var i = 0; i < departures.length; i++) {
+      for (var j = 0; j < wantedLines.length; j++) {
+        if (wantedLines[j] == departures[i][0]) {
+          filteredDepartures.push(departures[i]);
+        }
+      }
+    }
+    return filteredDepartures;
+  },
   
+  filterExcludedLines: function(departures, unwantedLines ) {
+    var filteredDepartures = [];
+    for (var i = 0; i < departures.length; i++) {
+      for (var j = 0; j < unwantedLines.length; j++) {
+        if (unwantedLines[j] != departures[i][0]) {
+          filteredDepartures.push(departures[i]);
+        }
+      }
+    }
+    return filteredDepartures;
+  },
+
   // Update the information on screen
   getDom: function() {
     var self = this;
+
+    // global config check
+    if ( ! this.config.hasOwnProperty("provider")) {
+      var errorWrapper = document.createElement("div");
+      errorWrapper.className = "small";
+      errorWrapper.innerHTML = "MMM-Departures: No provider set";
+      return errorWrapper;
+    }
+    if ( ! this.config.hasOwnProperty("stations")) {
+      var errorWrapper = document.createElement("div");
+      errorWrapper.className = "small";
+      errorWrapper.innerHTML = "MMM-Departures: No station set";
+      return errorWrapper;
+    }
+    
     var wrapper = document.createElement("table");
     wrapper.className = "small";
 
@@ -104,25 +142,40 @@ Module.register('MMM-Departures', {
     for (var si = 0; si < this.config.stations.length; si++) {
       station = this.config.stations[si];
 
-      var departuresShown = Math.min(this.config.maxElements, station.departures.length);
-      var minutesSinceUpdate = (Date.now() - this.lastUpdate)/60000;
+      // station may be not ready yet during startup
+      try {
+        var departuresShown = Math.min(this.config.maxElements, station.departures.length);
+      } catch (e) {
+        Log.log("catch...");
+        departuresShown = this.config.maxElements;
+      }
 
-      // Process only stations with departures
-      if (station.departures.length > 0) {
+      // station config check
+      if (station.hasOwnProperty("includeLines") && station.hasOwnProperty("excludeLines")) {
+        var stationRowWrapper = document.createElement("tr");
+        var stationWrapper = document.createElement("td");
+        stationWrapper.setAttribute("colspan", "3");
+        stationWrapper.innerHTML = station.stationName + ": only one of 'includeLines' and 'excludeLines' allowed";
+        stationRowWrapper.appendChild(stationWrapper);
+        wrapper.append(stationRowWrapper);
+        break;
+      }
       
-        var activeDepartures = [];
+      // Process only stations with departures
+      if (station.hasOwnProperty("departures") && station.departures.length > 0) {
+      
         // Filter departures, eliminate if too late to reach or even passed
-        for (var i = 0; i < station.departures.length; i++) {
-          if (parseInt(station.departures[i][2], 10) - minutesSinceUpdate > 0) {
-            if (station.hasOwnProperty("hideBelow")) {
-              if (parseInt(station.departures[i][2], 10) - minutesSinceUpdate >= station.hideBelow) {
-                activeDepartures.push(station.departures[i]);
-               }
-            } else {
-              activeDepartures.push(station.departures[i]);
-            }
-          }
-        }     
+        var activeDepartures = station.departures;
+        if (station.hasOwnProperty("hideBelow")) {
+          activeDepartures = this.filterPassedDepartures(activeDepartures, this.lastUpdate, station.hideBelow);
+        } 
+        // Filter wanted/unwanted lines
+        if (station.hasOwnProperty("includeLines")) {
+          activeDepartures = this.filterIncludedLines(activeDepartures, station.includeLines);
+        }
+        if (station.hasOwnProperty("excludeLines")) {
+          activeDepartures = this.filterExcludedLines(activeDepartures, station.excludeLines);
+        }
 
         // Build departure table: header with station name
         var stationRowNameWrapper = document.createElement("tr");
@@ -156,7 +209,12 @@ Module.register('MMM-Departures', {
             var departureInfoWrapper = document.createElement("td");
             // first 2 fields with spacer
             if (j < 2) {
-              departureInfoWrapper.innerHTML = activeDepartures[i][j] + "&nbsp;";
+              // cut destination station if configured
+              if (j == 1 && this.config.hasOwnProperty("maxDestinationLength")) {
+                departureInfoWrapper.innerHTML = activeDepartures[i][j].substr(0, this.config.maxDestinationLength) + "&nbsp;";
+              } else {
+                departureInfoWrapper.innerHTML = activeDepartures[i][j] + "&nbsp;";
+              }
               departureInfoWrapper.className = "align-left";
             }
             // time field
