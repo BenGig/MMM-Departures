@@ -146,7 +146,6 @@ Module.register('MMM-Departures', {
       try {
         var departuresShown = Math.min(this.config.maxElements, station.departures.length);
       } catch (e) {
-        Log.log("catch...");
         departuresShown = this.config.maxElements;
       }
 
