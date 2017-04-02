@@ -15,6 +15,7 @@ Module.register('MMM-Departures', {
     maxElements: 5,
     initialLoadDelay: 1000,
     updateInterval: 30 * 60 * 1000, // every 30 minutes
+    debug: false,
   },
   
   // Method is called when all modules are loaded an the system is ready to boot up
@@ -141,13 +142,7 @@ Module.register('MMM-Departures', {
     // Now iterate over defined stations
     for (var si = 0; si < this.config.stations.length; si++) {
       station = this.config.stations[si];
-
-      // station may be not ready yet during startup
-      try {
-        var departuresShown = Math.min(this.config.maxElements, station.departures.length);
-      } catch (e) {
-        departuresShown = this.config.maxElements;
-      }
+      if (this.config.debug) { Log.log("Processing station " + station.stationName) };
 
       // station config check
       if (station.hasOwnProperty("includeLines") && station.hasOwnProperty("excludeLines")) {
@@ -157,12 +152,13 @@ Module.register('MMM-Departures', {
         stationWrapper.innerHTML = station.stationName + ": only one of 'includeLines' and 'excludeLines' allowed";
         stationRowWrapper.appendChild(stationWrapper);
         wrapper.append(stationRowWrapper);
+        if (this.config.debug) { Log.log("- Processing stopped: both 'includeLines' and 'excludeLines' used") };
         break;
       }
       
       // Process only stations with departures
       if (station.hasOwnProperty("departures") && station.departures.length > 0) {
-      
+
         // Filter departures, eliminate if too late to reach or even passed
         var activeDepartures = station.departures;
         if (station.hasOwnProperty("hideBelow")) {
@@ -176,6 +172,15 @@ Module.register('MMM-Departures', {
           activeDepartures = this.filterExcludedLines(activeDepartures, station.excludeLines);
         }
 
+        // station may be not ready yet during startup
+        try {
+          var departuresShown = Math.min(this.config.maxElements, station.departures.length);
+        } catch (e) {
+          departuresShown = this.config.maxElements;
+        }
+
+        if (this.config.debug) { Log.log("- Departures found: " + departuresShown) };
+        
         // Build departure table: header with station name
         var stationRowNameWrapper = document.createElement("tr");
         stationRowNameWrapper.className = "small";
@@ -193,6 +198,7 @@ Module.register('MMM-Departures', {
 
         // Now list departures
         for (var i = 0; i < departuresShown; i++) {
+          if (this.config.debug) { Log.log("-- Processing departure: " + activeDepartures[i]) };
           var departureWrapper = document.createElement("tr");
           // Fade out last 2 entries (only if more than 2 entries...)
           if (departuresShown > 2) {
