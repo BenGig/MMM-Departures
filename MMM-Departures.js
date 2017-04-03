@@ -133,6 +133,7 @@ Module.register('MMM-Departures', {
     if (this.config.debug) { Log.log("Stations defined: " + this.config.stations.length) };
     
     if (!this.loaded) {
+      if (this.config.debug) { Log.log("State: module not completely loaded yet") };
       var wrapper = document.createElement("div");
       wrapper.innerHTML = this.translate("LOADING");
       wrapper.className = "small dimmed";
