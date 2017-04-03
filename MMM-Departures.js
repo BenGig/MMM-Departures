@@ -130,14 +130,17 @@ Module.register('MMM-Departures', {
       return errorWrapper;
     }
     
-    var wrapper = document.createElement("table");
-    wrapper.className = "small";
-
+    if (this.config.debug) { Log.log("Stations defined: " + this.config.stations.length) };
+    
     if (!this.loaded) {
+      var wrapper = document.createElement("div");
       wrapper.innerHTML = this.translate("LOADING");
       wrapper.className = "small dimmed";
       return wrapper;
     }
+
+    var wrapper = document.createElement("table");
+    wrapper.className = "small";
 
     // Now iterate over defined stations
     for (var si = 0; si < this.config.stations.length; si++) {

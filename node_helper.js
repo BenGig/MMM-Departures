@@ -31,6 +31,8 @@ module.exports = NodeHelper.create({
       if (!error && response.statusCode == 200) {
         var structuredData = callback(body, this.id);
         self.sendSocketNotification('DATARECEIVED', structuredData);
+      }  else {
+        console.log("MMM-Departures error: " + error)
       }
     }.bind({id: config.stations[i].stationId}));
   },
