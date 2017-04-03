@@ -74,8 +74,7 @@ Module.register('MMM-Departures', {
   },
 
   // Filter departures based on remaining time
-  filterPassedDepartures: function(departures, lastUpdate, threshold) {
-    var minutesSinceUpdate = (Date.now() - lastUpdate)/60000;
+  filterPassedDepartures: function(departures, minutesSinceUpdate, threshold) {
     var filteredDepartures = [];
     
     for (var i = 0; i < departures.length; i++) {
@@ -160,13 +159,14 @@ Module.register('MMM-Departures', {
         break;
       }
       
+      var minutesSinceUpdate = (Date.now() - this.lastUpdate)/60000;
       // Process only stations with departures
       if (station.hasOwnProperty("departures") && station.departures.length > 0) {
 
         // Filter departures, eliminate if too late to reach or even passed
         var activeDepartures = station.departures;
         if (station.hasOwnProperty("hideBelow")) {
-          activeDepartures = this.filterPassedDepartures(activeDepartures, this.lastUpdate, station.hideBelow);
+          activeDepartures = this.filterPassedDepartures(activeDepartures, minutesSinceUpdate, station.hideBelow);
         } 
         // Filter wanted/unwanted lines
         if (station.hasOwnProperty("includeLines")) {
