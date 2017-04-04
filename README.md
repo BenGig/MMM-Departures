@@ -23,7 +23,7 @@ Module global parameters:
 | updateInterval | Pause between data updates in microseconds. Default value: 30 minutes |
 | debug | Some output in browser console: Default value: false |
 
-Since the request retrieves several future departures and the module eliminates departures which have passed, you don't have to fetch data updates very often. To reduce load on the server, start with the default of 15 minutes and reduce the interval if needed.
+Since the request retrieves several future departures and the module eliminates departures which have passed, you don't have to fetch data updates very often. To reduce load on the server, start with the default of 30 minutes and reduce the interval if needed.
 
 There are also optional parameters per station:
 
@@ -42,6 +42,7 @@ modules: [
   {
     module: 'MMM-Departures',
     position: 'bottom_right',
+    updateInterval: 15 * 60 * 1000, // every 15 minutes
     config: {
       provider: 'Sbb',
       maxElements: 4,
