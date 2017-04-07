@@ -183,7 +183,6 @@ Module.register('MMM-Departures', {
 
         // Filter departures, eliminate if too late to reach or even passed
         var activeDepartures = station.departures;
-        Log.log("Minutes since update " + minutesSinceUpdate);
         activeDepartures = this.filterDepartures(activeDepartures, station, minutesSinceUpdate);
 
         // station may be not ready yet during startup
