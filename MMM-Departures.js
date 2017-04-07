@@ -18,6 +18,10 @@ Module.register('MMM-Departures', {
     debug: false,
   },
   
+  getStyles: function () {
+    return ["MMM-Departures.css"];
+  },
+  
   // Method is called when all modules are loaded an the system is ready to boot up
   start: function() {
     var self = this;
@@ -73,7 +77,7 @@ Module.register('MMM-Departures', {
     return num;
   },
 
-  // Filter departures based on remaining time
+  // Filter departures
   filterPassedDepartures: function(departures, minutesSinceUpdate, threshold) {
     var filteredDepartures = [];
     
@@ -86,7 +90,6 @@ Module.register('MMM-Departures', {
     }     
     return filteredDepartures;
   },
-
   filterIncludedLines: function(departures, wantedLines ) {
     var filteredDepartures = [];
     for (var i = 0; i < departures.length; i++) {
@@ -98,7 +101,6 @@ Module.register('MMM-Departures', {
     }
     return filteredDepartures;
   },
-  
   filterExcludedLines: function(departures, unwantedLines ) {
     var filteredDepartures = [];
     for (var i = 0; i < departures.length; i++) {
@@ -110,7 +112,23 @@ Module.register('MMM-Departures', {
     }
     return filteredDepartures;
   },
+  filterDepartures: function(departures, station, minutesSinceUpdate) {
+    if (station.hasOwnProperty("hideBelow")) {
+      departures = this.filterPassedDepartures(departures, minutesSinceUpdate, station.hideBelow);
+    } else {
+      departures = this.filterPassedDepartures(departures, minutesSinceUpdate, 0);
+    }
+    // Filter wanted/unwanted lines
+    if (station.hasOwnProperty("includeLines")) {
+      departures = this.filterIncludedLines(departures, station.includeLines);
+    }
+    if (station.hasOwnProperty("excludeLines")) {
+      departures = this.filterExcludedLines(departures, station.excludeLines);
+    }
+    return departures;
+  },
 
+  
   // Update the information on screen
   getDom: function() {
     var self = this;
@@ -165,16 +183,8 @@ Module.register('MMM-Departures', {
 
         // Filter departures, eliminate if too late to reach or even passed
         var activeDepartures = station.departures;
-        if (station.hasOwnProperty("hideBelow")) {
-          activeDepartures = this.filterPassedDepartures(activeDepartures, minutesSinceUpdate, station.hideBelow);
-        } 
-        // Filter wanted/unwanted lines
-        if (station.hasOwnProperty("includeLines")) {
-          activeDepartures = this.filterIncludedLines(activeDepartures, station.includeLines);
-        }
-        if (station.hasOwnProperty("excludeLines")) {
-          activeDepartures = this.filterExcludedLines(activeDepartures, station.excludeLines);
-        }
+        Log.log("Minutes since update " + minutesSinceUpdate);
+        activeDepartures = this.filterDepartures(activeDepartures, station, minutesSinceUpdate);
 
         // station may be not ready yet during startup
         try {
@@ -187,10 +197,11 @@ Module.register('MMM-Departures', {
         
         // Build departure table: header with station name
         var stationRowNameWrapper = document.createElement("tr");
-        stationRowNameWrapper.className = "small";
+        // stationRowNameWrapper.className = "small";
 
         var stationNameWrapper = document.createElement("td");
-        stationNameWrapper.className = "bright";
+        //stationNameWrapper.className = "bright";
+        stationNameWrapper.className = "heading";
         stationNameWrapper.setAttribute("colspan", "3");
         stationNameWrapper.innerHTML = station.stationName;
 
