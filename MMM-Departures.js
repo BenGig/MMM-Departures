@@ -177,7 +177,7 @@ Module.register('MMM-Departures', {
         break;
       }
       
-      var minutesSinceUpdate = (Date.now() - this.lastUpdate)/60000;
+      var minutesSinceUpdate = Math.round((Date.now() - this.lastUpdate)/60000);
       // Process only stations with departures
       if (station.hasOwnProperty("departures") && station.departures.length > 0) {
 
