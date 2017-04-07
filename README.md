@@ -20,7 +20,7 @@ Module global parameters:
 | --- | --- |
 | maxElements | Restrict the number of departures shown per station. Default value: 5 |
 | absoluteTime | Display departures as hours and minutes (HH:MM), or minutes until departure. Default value: true |
-| updateInterval | Pause between data updates in microseconds. Default value: 30 minutes |
+| updateInterval | Pause between data updates in microseconds. Default value: 30 minutes (would be noted as: 30 * 60 * 1000 |
 | debug | Some output in browser console: Default value: false |
 
 Since the request retrieves several future departures and the module eliminates departures which have passed, you don't have to fetch data updates very often. To reduce load on the server, start with the default of 30 minutes and reduce the interval if needed.
