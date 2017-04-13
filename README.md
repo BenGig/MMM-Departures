@@ -51,7 +51,7 @@ modules: [
         {
           stationName: "Markthalle",
           stationId: "8500193",
-          hideBelow: 5;
+          hideBelow: 5,
           excludeLines: [
             "NFB2",
           ],
