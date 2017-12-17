@@ -1,3 +1,6 @@
+# Currently not in Service
+Because Red Hat has discontinued their free OpenStack offering (yes, there is still one, but limited, with forced downtimes), the translator service had to be shut down. No alternative has been found yet, but as soon as there is one, the module will be updated.
+
 # MMM-Departures
 [Magic mirror](https://github.com/MichMich/MagicMirror) module for public transport departure times. Data source is pulled from a server running the [public-transport-enabler](https://github.com/schildbach/public-transport-enabler/blob/master/enabler/README.md) which uses the same data as the popular [Oeffi](https://oeffi.schildbach.de/index.html) smartphone app uses: 13 countries and almost 20 cities are supported.
 
